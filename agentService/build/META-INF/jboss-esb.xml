@@ -1,0 +1,64 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="hornetq" connection-factory="ConnectionFactory">
+
+              <jms-bus busid="registrationChannel">  
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="agentRegistrationQueue"
+                  />
+              </jms-bus>
+
+              <jms-bus busid="notificationChannel">  
+                  <jms-message-filter
+                      dest-type="TOPIC"
+                      dest-name="agentNotificationTopic"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+      	<service 
+        	category="Agents" 
+        	name="AgentRegistrationService" 
+        	description="Sets up hornetq queues for agents">
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="registrationChannel"
+                    is-gateway="true"
+                />
+				<jms-listener name="esbistener"
+  	       	  		busidref="registrationChannel"/>  <!-- is required for some reason.. -->
+
+            </listeners>
+            <actions mep="OneWay">
+                   <action name="registration" 
+                   	class="org.jboss.soa.esb.Almende.agentService.ReceiveMessage" 
+                   	process="receiveMessage" 
+                   	/>      
+            </actions>
+
+<!--                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+               <action name="displayMessageAction" 
+                   	class="org.jboss.soa.esb.samples.quickstart.simplecbr.MyJMSListenerAction" 
+                   	process="displayMessage" 
+                   	/>   -->
+                <!-- This can be replaced with notification -->
+      <!--          <action name="route"
+                   class="org.jboss.soa.esb.samples.quickstart.simplecbr.RouteNormalShipping"
+                   process="sendResponse"
+                />
+   -->
+        </service>
+
+  	
+    </services>
+</jbossesb>

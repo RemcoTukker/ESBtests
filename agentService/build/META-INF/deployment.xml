@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><jbossesb-deployment>
+ 
+
+<!-- not required anymore, moved to deploy directory of jboss AS  <jmsQueue>sink1</jmsQueue>
+   <jmsQueue>agentRegistrationQueue</jmsQueue>
+  <jmsTopic>agentNotificationTopic</jmsTopic> -->
+</jbossesb-deployment>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<jbossesb-deployment>
+  <jmsQueue>sink1</jmsQueue>
+ <!-- <jmsQueue>agentRegistrationQueue</jmsQueue>
+  <jmsTopic>agentNotificationTopic</jmsTopic> -->
+</jbossesb-deployment>

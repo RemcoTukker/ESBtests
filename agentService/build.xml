@@ -1,0 +1,43 @@
+<project name="Almende_test_2" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- <property name="additional.deploys" value="SimpleCBRRules-XPath.drl"/> -->
+
+	<!-- Import the base Ant build script... -->
+        <import file="../conf/base-build.xml"/>
+		
+  <target name="runtest" description="sends ESB messages" depends="compile">
+     <echo>Runs Test ESB Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.Almende.agentService.SendEsbMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+                <arg value="sink"/> <!--  service category -->
+        	<arg value="sink1service"/>  <!--  service name -->
+		<arg value="Hello World - Straight to ESB listener - no Gateway"/> <!--  Message text -->
+		<classpath refid="exec-classpath"/>
+     </java>
+  </target>  
+
+<!--	
+  <target name="receiveExpress" description="runs Test JMS Receiver express" depends="compile">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.simplecbr.test.ReceiveJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	  	<arg value="queue/CBRExpressFreeShippingAlert"/>
+		<classpath refid="exec-classpath"/>
+	 </java>
+  </target>  
+	
+  <target name="receiveNormal" description="runs Test JMS Receive normal" depends="compile">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.simplecbr.test.ReceiveJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	   	<arg value="queue/CBRNormalShippingAlert"/>
+		<classpath refid="exec-classpath"/>
+	 </java>
+   </target>  
+	-->
+</project>

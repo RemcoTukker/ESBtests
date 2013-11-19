@@ -1,0 +1,38 @@
+Remco Tukker, Almende, 21 February 2013 
+
+
+This runtest sends a lot of very similar JMS messages to the CBR gateway, the CBR uses a very simple rule to route these messages to one of three sinks, and the sinks report (from the server terminal) when they have received a certain number of messages.
+
+On my system, it takes about 10 sec for 3 * 2000 messages to be processed. 
+
+******** Description of contents: **********************
+
+src
+ java source
+
+build
+ java classes
+
+build.xml 
+ ant build script that imports the base-build.xml script from the conf folder and gives the additional info that the path rules should be deployed and what the test executable is. Also requires log4j.xml
+
+deployment.xml
+ gives the info that jbrules.esb is required and queues have to be registered here
+
+jbm-queue-service
+ this seems to be the actual specification of the queues; why do we have to specify it here as well as in deployment.xml?
+
+jboss-esb.xml
+ esb config file; requires the specification of the JMS provider and again the queues... Also, how these queues are used by the services and what actions (java code) the services should perform on the messages in the queue.
+
+jndi.properties
+ provides some context to the java code
+
+log4j.xml
+ something that the ant build script requires => build.xml
+
+SampleOrder.xml
+ just some test file to be transmitted and CBR'ed
+
+SimpleCBRRules-XPath.drl
+ these contain the XPath CBR rules

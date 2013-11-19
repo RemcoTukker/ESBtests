@@ -1,0 +1,141 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="cbr">   <!-- the queue for our cbr service -->
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/cbr"
+                  />
+              </jms-bus>  
+              <jms-bus busid="cbrGate">   <!-- the gateway for our cbr service -->
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/cbrGate"
+                  />
+              </jms-bus>  
+              <jms-bus busid="sink1q">  <!-- the sinks that the cbr service delivers to -->
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/sink1q"
+                  />
+              </jms-bus>
+              <jms-bus busid="sink2q">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/sink2q"
+                  />
+              </jms-bus>
+	      <jms-bus busid="sink3q">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/sink3q"
+                  />
+              </jms-bus>
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+        <!--  ESB CBR Service -->
+        <service 
+        	category="MyFirstCBRServicesESB" 
+        	name="FirstCBRServiceESB" 
+        	description="ESB Listener" >
+        	<listeners>
+        	    <!--  Gateway -->     
+        	    <jms-listener name="the-gateway"
+        	        busidref="cbrGate"
+        	        is-gateway="true"
+        	    />    
+                    
+		    <jms-listener name="XPathContentBasedRouter"
+                              busidref="cbr" >          
+	            </jms-listener>
+             </listeners>
+            <actions mep="OneWay"> <!-- built-in CBR action to be performed on messages in the queue  -->
+                <!-- <action name="FirstPrintIncoming" class="org.jboss.soa.esb.actions.SystemPrintln">
+                      <property name="printfull" value="false"/>
+                </action>                 -->
+
+                <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                    <property name="ruleSet" value="SimpleCBRRules-XPath.drl"/>
+                    <property name="ruleLanguage" value="XPathLanguage.dsl"/>
+                    <property name="ruleReload" value="true"/>
+                    <property name="destinations">  <!-- destination queues of the built-in CBR  -->
+                        <route-to destination-name="sink1" service-category="sink" service-name="sink1service"/>
+                        <route-to destination-name="sink2"  service-category="sink"  service-name="sink2service"/>
+                        <route-to destination-name="sink3"  service-category="sink"  service-name="sink3service"/>
+                    </property>  
+                </action>
+            </actions>
+        </service>
+        
+        <!--  sink services, all doing ~ the same -->
+        <service
+  	      category="sink"
+  	      name="sink1service"
+  	      description="Sink Service 1">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="sink1q"
+  	       	  busidref="sink1q"/>
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="receiveMessage" 
+                   	class="org.jboss.soa.esb.testsAlmende.cbrtest.simplecbr.ReceiveMessage" 
+                   	process="receiveMessage" 
+                 />
+<!--                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+               <action name="displayMessageAction" 
+                   	class="org.jboss.soa.esb.samples.quickstart.simplecbr.MyJMSListenerAction" 
+                   	process="displayMessage" 
+                   	/>   -->
+                <!-- This can be replaced with notification -->
+      <!--          <action name="route"
+                   class="org.jboss.soa.esb.samples.quickstart.simplecbr.RouteNormalShipping"
+                   process="sendResponse"
+                />
+   -->
+           </actions>
+        </service>
+
+  	 <service
+  	      category="sink"
+  	      name="sink2service"
+  	      description="Sink Service 2">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="sink2q"
+  	       	  busidref="sink2q"/>
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="receiveMessage" 
+                   	class="org.jboss.soa.esb.testsAlmende.cbrtest.simplecbr.ReceiveMessage" 
+                   	process="receiveMessage" 
+                 />
+           </actions>
+        </service>   
+
+        <service
+  	      category="sink"
+  	      name="sink3service"
+  	      description="Sink Service 3">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="sink3q"
+  	       	  busidref="sink3q"/>
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="receiveMessage" 
+                   	class="org.jboss.soa.esb.testsAlmende.cbrtest.simplecbr.ReceiveMessage" 
+                   	process="receiveMessage" 
+                 />
+           </actions>
+        </service>
+    </services>
+</jbossesb>

@@ -1,0 +1,237 @@
+/*
+ * JBoss, Home of Professional Open Source
+ * Copyright 2006, JBoss Inc., and others contributors as indicated 
+ * by the @authors tag. All rights reserved. 
+ * See the copyright.txt in the distribution for a
+ * full listing of individual contributors. 
+ * This copyrighted material is made available to anyone wishing to use,
+ * modify, copy, or redistribute it subject to the terms and conditions
+ * of the GNU Lesser General Public License, v. 2.1.
+ * This program is distributed in the hope that it will be useful, but WITHOUT A 
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License,
+ * v.2.1 along with this distribution; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301, USA.
+ * 
+ * (C) 2005-2006,
+ * @author JBoss Inc.
+ */
+package org.jboss.soa.esb.Almende.agentService;
+
+//import javax.jms.Message;  //hornetq methods needs this Message
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+//import javax.jms.QueueReceiver;
+import javax.jms.QueueSession;
+import javax.jms.QueueRequestor;
+import javax.jms.Session;
+//import javax.jms.TextMessage;
+import javax.naming.InitialContext;
+
+
+import org.jboss.soa.esb.actions.AbstractActionLifecycle;
+import org.jboss.soa.esb.helpers.ConfigTree;
+//import org.jboss.soa.esb.message.Message; ///jboss esb needs this Message 
+
+import org.hornetq.api.jms.HornetQJMSClient;
+import org.hornetq.api.jms.management.JMSManagementHelper;
+
+public class ReceiveMessage extends AbstractActionLifecycle {
+	
+          int msgCount = 0;
+
+	  protected ConfigTree	_config;
+	  
+	  public ReceiveMessage(ConfigTree config) { _config = config; } 
+	  
+	  // used to send response
+	  public org.jboss.soa.esb.message.Message noOperation(org.jboss.soa.esb.message.Message message) { return message; }
+	  
+	  public org.jboss.soa.esb.message.Message receiveMessage(org.jboss.soa.esb.message.Message message) throws Exception{
+		 
+			//ok, we got a message from a prospective agent. So, lets find out what queue this agent wants
+			
+			System.out.println("Header: " + message.getHeader().getCall().toString());
+			System.out.println("Body: " + message.getBody().get());
+			
+			//find out origin, queue, etc
+
+			//now we know what we can do for this agent: create a queue
+			QueueConnection connection = null;
+	 	    InitialContext initialContext = null;
+			try
+		    {
+
+				System.out.println("trying to do management");
+         		initialContext = new InitialContext();
+				QueueConnectionFactory cf = (QueueConnectionFactory)initialContext.lookup("/ConnectionFactory"); //lookup connection factory
+				connection = cf.createQueueConnection("AlmendeAgentService","Nijmegen"); //create connection
+				QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE); //create session
+				Queue managementQueue = HornetQJMSClient.createQueue("hornetq.management"); //create special management queue
+				QueueRequestor requestor = new QueueRequestor(session, managementQueue); //create queue requestor
+				connection.start();
+				javax.jms.Message m = session.createMessage(); //this is going to be the management message
+				
+				//fill message with desired operation
+				JMSManagementHelper.putAttribute(m, "jms.queue.agentRegistrationQueue", "messageCount");
+				//and send it and process reply
+				javax.jms.Message reply = requestor.request(m); //remember to set permissions for hornetq management properly!!
+				int messageCount = (Integer)JMSManagementHelper.getResult(reply);
+        	 	System.out.println("the queue contains " + messageCount + " messages");
+
+				//m = session.createMessage();
+		        //JMSManagementHelper.putOperationInvocation(m, "jms.queue.exampleQueue", "removeMessage", message.getJMSMessageID());
+				//JMSManagementHelper.putOperationInvocation(m, "createTopic", "example");
+
+         		//reply = requestor.request(m);
+
+         		//boolean success = JMSManagementHelper.hasOperationSucceeded(reply);
+         		//System.out.println("operation invocation has succeeded: " + success);
+         		//boolean queueCreated = (Boolean)JMSManagementHelper.getResult(reply);
+         		//System.out.println("message has been removed: " + queueCreated);
+				
+				m = session.createMessage();
+				JMSManagementHelper.putOperationInvocation(m, "jms.server", "createQueue", "bla"); //this is doing what I want!
+				reply = requestor.request(m);	
+				boolean success = JMSManagementHelper.hasOperationSucceeded(reply);
+         		System.out.println("operation invocation has succeeded: " + success);
+         		
+
+				return message;
+			}
+			catch (Exception e)
+			{
+				System.out.println("exception generated!");
+			}
+			finally
+			{
+				if (initialContext != null) initialContext.close();
+                if (connection != null) connection.close();
+			}
+
+		   return message;
+	  }
+	   private void logHeader() {
+		   System.out.println("\n&&&&& message received &&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+	   }
+	   private void logFooter() {
+		   System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+	   }
+
+	
+}
+/*
+public class ReceiveJMSMessage {
+   
+QueueConnection conn = null;    
+   QueueSession receiverSession = null;    
+   Queue receiverQueue = null;     
+   QueueReceiver queueReceiver = null;
+   InitialContext iniCtx = null;
+   QueueConnectionFactory qcf = null;
+   String receiveQueueName = "queue/quickstart_simplecbr_response"; 
+    private boolean initialised ;
+   
+   public ReceiveJMSMessage() {
+       
+   }
+   public void receiveOne() {
+        if (!initialised) {
+            initialise() ;
+        }
+        
+        if (receiverQueue != null) {
+           try {
+               TextMessage msg = (TextMessage) queueReceiver.receive();
+               if (msg != null) {
+              System.out.println("*********************************************************");
+              System.out.println(msg.getText());
+              System.out.println("*********************************************************");
+               }
+           } catch (final Exception ex) {
+               cleanup() ;
+               System.out.println(ex.getMessage()) ;
+           }
+        }
+        
+        if (!initialised) {
+            System.out.println("Pausing before reinitialising") ;
+            try {
+                Thread.sleep(5000) ;
+            } catch (final InterruptedException ie) {
+                // do nothing
+            }
+        }
+   }
+    
+    private void initialise()
+    {
+        try {
+           if (iniCtx == null) iniCtx = new InitialContext();
+           if (qcf == null) qcf = (QueueConnectionFactory) iniCtx.lookup("ConnectionFactory");
+           if (conn == null) {
+               conn = qcf.createQueueConnection();
+               conn.start();
+           }             
+           receiverQueue = (Queue) iniCtx.lookup(receiveQueueName);
+           receiverSession = conn.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE);
+           queueReceiver = receiverSession.createReceiver(receiverQueue);
+           initialised = true ;
+           System.out.println("Initialised") ;
+        } catch (final Exception ex) {
+            cleanup() ;
+        }
+    }
+    
+    public void cleanup() {
+        System.out.println("Closing connections");
+        queueReceiver = null ;
+        receiverSession = null ;
+        receiverQueue = null ;
+        if (receiverSession!=null) {
+            try {
+                receiverSession.close();
+            } catch (final Exception ex) {
+                // Do nothing ;
+            }
+        }
+        if (conn!=null) {
+            try {
+                conn.close() ;
+            } catch (final Exception ex) {
+                // Do nothing ;
+            }
+        }
+        conn = null ;
+        qcf = null ;
+        iniCtx = null ;
+        initialised = false ;
+        System.out.println("Closing completed");
+    }
+    
+   public static void main(String[] args) {
+          final ReceiveJMSMessage receiver = new ReceiveJMSMessage();
+          
+          if ((args.length > 0) && (args[0] != null)) {
+              receiver.receiveQueueName = args[0];
+              System.out.println("Receiving on: " + receiver.receiveQueueName );                 
+           Runtime.getRuntime().addShutdownHook(new Thread() {
+               public void run() {
+                   receiver.cleanup() ;
+               }
+           }) ;
+           while (true) { // loop until I'm killed
+               receiver.receiveOne();
+               try {
+                   Thread.sleep(500);
+               } catch (InterruptedException e) {break;}
+           } 
+          
+       } else {
+           System.out.println("Usage <queue-name>");
+       }
+   }
+}*/

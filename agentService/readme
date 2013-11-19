@@ -1,0 +1,8 @@
+Remco Tukker, Almende, 22 February 2013 
+
+injecting a message directly into another service 
+
+Same procedure, ant deploy / ant runtest. Check output in server terminal. ant undeploy to remove module from esb.
+
+******** Description of contents: **********************
+

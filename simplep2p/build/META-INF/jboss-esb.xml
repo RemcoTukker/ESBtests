@@ -1,0 +1,54 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="esbchannel">  <!-- the sinks that the messages are sent to -->
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/sink1"
+                  />
+              </jms-bus>
+              
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+      
+        
+        <!--  sink services, all doing ~ the same -->
+        <service
+  	      category="sink"
+  	      name="sink1service"
+  	      description="Sink Service 1">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="esbchannellistener"
+  	       	  busidref="esbchannel"/>
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="receiveMessage" 
+                   	class="org.jboss.soa.esb.testsAlmende.simplep2p.ReceiveMessage" 
+                   	process="receiveMessage" 
+                 />
+<!--                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+               <action name="displayMessageAction" 
+                   	class="org.jboss.soa.esb.samples.quickstart.simplecbr.MyJMSListenerAction" 
+                   	process="displayMessage" 
+                   	/>   -->
+                <!-- This can be replaced with notification -->
+      <!--          <action name="route"
+                   class="org.jboss.soa.esb.samples.quickstart.simplecbr.RouteNormalShipping"
+                   process="sendResponse"
+                />
+   -->
+           </actions>
+        </service>
+
+  	
+    </services>
+</jbossesb>

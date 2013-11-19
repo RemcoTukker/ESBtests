@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<jbossesb-deployment>
+  <depends>jboss.esb:deployment=jbrules.esb</depends>
+  <jmsQueue>cbr</jmsQueue>
+  <jmsQueue>cbrGate</jmsQueue>
+  <jmsQueue>sink1q</jmsQueue>
+  <jmsQueue>sink2q</jmsQueue>
+  <jmsQueue>sink3q</jmsQueue>
+</jbossesb-deployment>

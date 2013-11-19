@@ -1,0 +1,10 @@
+Remco Tukker, 22 February 2013
+
+To use these files, do the following:
+
+1. Setup jbossesb-server-4.11
+
+2. Drop the testsAlmende folder in the jbossesb-server-4.11 folder, then follow same procedure as with quickstart samples: run the server from JBoss' ESB bin folder with the run.sh script, move to the scenario folders and use "ant deploy" "ant runtest" and "ant undeploy".
+
+
+The conf folders contains a couple of configuration files, the other folders contain the test scenarios. 

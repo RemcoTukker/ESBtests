@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<configuration xmlns="urn:hornetq" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hornetq /schema/hornetq-jms.xsd">
+  <queue name="sink1">
+    <entry name="queue/sink1"/>
+  </queue>
+
+</configuration>

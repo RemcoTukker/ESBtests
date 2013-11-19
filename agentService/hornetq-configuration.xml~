@@ -1,0 +1,26 @@
+<configuration xmlns="urn:hornetq"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="urn:hornetq /schema/hornetq-configuration.xsd">
+
+
+<!-- security settings for agent administration queue and topic -->
+      <security-setting match="jms.topic.agentNotificationTopic">
+         <permission type="createDurableQueue" roles="agentGuest"/>
+         <permission type="deleteDurableQueue" roles="agentGuest"/>
+         <permission type="createNonDurableQueue" roles="agentGuest"/>
+         <permission type="deleteNonDurableQueue" roles="agentGuest"/>
+         <permission type="consume" roles="agentGuest"/>
+         <permission type="send" roles="agentAdmin"/>
+      </security-setting>
+
+	  <security-setting match="jms.queue.agentRegistrationQueue">
+         <permission type="createDurableQueue" roles="agentAdmin,guest"/>
+         <permission type="deleteDurableQueue" roles="agentAdmin,guest"/>
+         <permission type="createNonDurableQueue" roles="agentAdmin,guest"/>
+         <permission type="deleteNonDurableQueue" roles="agentAdmin,guest"/>
+         <permission type="consume" roles="agentAdmin,guest"/>
+         <permission type="send" roles="agentGuest,guest"/>
+      </security-setting>   
+
+
+</configuration>
